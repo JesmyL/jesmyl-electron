@@ -1,0 +1,45 @@
+{
+  "name": "jesmyl-electron",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "keywords": [],
+  "author": "gfirf",
+  "email": "gfirf@gfirf.ru",
+  "license": "ISC",
+  "description": "",
+  "scripts": {
+    "el": "electron .",
+    "build:docker": "docker run --rm -it -v ${PWD}:/project -w /project -e ELECTRON_CACHE=\"/root/.cache/electron\" electronuserland/builder:wine sh -c \"npm ci --legacy-peer-deps && npm run build\"",
+    "build": "electron-builder --win --linux"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0"
+  },
+  "main": "electron.driver.mjs",
+  "build": {
+    "appId": "com.example.presentation",
+    "productName": "JESMYL_PRE",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "icon.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility",
+      "asarUnpack": [
+        "**/chrome-sandbox**"
+      ]
+    }
+  }
+}
