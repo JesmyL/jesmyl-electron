@@ -38,7 +38,10 @@ app.whenReady().then(async () => {
     return {
       url,
       name: cookieEventName,
-      value: `${`${Date.now()}`.padStart(cookieEventStartSliceLen, "0")}${JSON.stringify(value)}`,
+      value: `${`${Date.now()}`.padStart(
+        cookieEventStartSliceLen,
+        "0"
+      )}${JSON.stringify(value)}`,
     };
   };
 
@@ -72,7 +75,7 @@ app.whenReady().then(async () => {
         ...details.responseHeaders,
         "Content-Security-Policy": [
           "default-src 'self' https: http: data: blob: 'unsafe-inline'; " +
-            "img-src * data: blob:; " + // ✅ data: для изображений
+            "img-src * data: blob:; " +
             "script-src 'self' 'unsafe-inline' https: http: blob: data:; " +
             "style-src 'self' 'unsafe-inline' https: http: blob: data:; " +
             "connect-src * data: blob:; " +
@@ -100,6 +103,7 @@ app.whenReady().then(async () => {
       fullscreen: true,
       kiosk: true,
       show: false,
+      backgroundColor: "#000000",
 
       webPreferences: {
         nodeIntegration: false,
@@ -112,12 +116,7 @@ app.whenReady().then(async () => {
 
     presentationWin.setBackgroundColor("#000000");
     await presentationWin.loadURL(`${url}/presentation`);
-
-    presentationWin.webContents.on("before-input-event", (_event, input) => {
-      if (input.type === "keyDown" && input.code === "Escape") {
-        presentationWin.close();
-      }
-    });
+    presentationWin.show();
   }
 
   let timeout;
@@ -128,29 +127,35 @@ app.whenReady().then(async () => {
     timeout = setTimeout(() => {
       if (cookie.name !== cookieEventName) return;
       const eventName = JSON.parse(
-        cookie.value.slice(cookieEventStartSliceLen),
+        cookie.value.slice(cookieEventStartSliceLen)
       );
       if (prevEventName === eventName) return;
       prevEventName = eventName;
 
       try {
-        if (eventName === "CLOSE") presentationWin.close();
+        if (eventName === "CLOSE") presentationWin.minimize();
         if (eventName === "SHOW") {
-          // if (presentationWin) presentationWin.maximize();
-          // else {
-          const projector = screen
-            .getAllDisplays()
-            .find((d) => d.bounds.x !== 0 || d.bounds.y !== 0);
+          if (presentationWin) presentationWin.maximize();
+          else {
+            const projector = screen
+              .getAllDisplays()
+              .find((d) => d.bounds.x !== 0 || d.bounds.y !== 0);
 
-          createSlideshowWindow(projector);
+            createSlideshowWindow(projector);
+          }
         }
 
-        setTimeout(() => {
-          win.focus();
-          win.setAlwaysOnTop(true);
-          win.setAlwaysOnTop(false);
-        }, 100);
-        // }
+        const interval = setInterval(() => {
+          try {
+            win.focus();
+            win.setAlwaysOnTop(true);
+            win.setAlwaysOnTop(false);
+          } catch (_e) {
+            //
+          }
+        }, 50);
+
+        setTimeout(() => clearInterval(interval), 2000);
       } catch (_e) {
         console.log({ _e });
       }
