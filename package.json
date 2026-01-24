@@ -1,6 +1,6 @@
 {
   "name": "jesmyl-electron",
-  "version": "0.1.1",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "keywords": [],
@@ -9,19 +9,22 @@
   "license": "ISC",
   "description": "",
   "scripts": {
-    "el": "electron .",
-    "build:docker": "docker run --rm -it -v ${PWD}:/project -w /project -e ELECTRON_CACHE=\"/root/.cache/electron\" electronuserland/builder:wine sh -c \"npm ci --legacy-peer-deps && npm run build\"",
-    "build": "electron-builder --win --linux"
+    "start": "electron .",
+    "build": "docker run --rm -it -v ${PWD}:/project -w /project -e ELECTRON_CACHE=\"/root/.cache/electron\" electronuserland/builder:wine-mono sh -c \"npm ci --legacy-peer-deps && npx electron-builder --win --linux\""
   },
-  "dependencies": {},
   "devDependencies": {
+    "adm-zip": "^0.5.16",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0"
   },
   "main": "electron.driver.mjs",
   "build": {
     "appId": "com.example.presentation",
-    "productName": "JESMYL_PRE",
+    "productName": "JESMYL_PRO",
+    "files": [
+      "**/*",
+      "!node_modules/*/{test,__tests__,*.md}"
+    ],
     "directories": {
       "output": "dist"
     },
