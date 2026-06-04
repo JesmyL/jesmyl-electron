@@ -1,12 +1,28 @@
 import { app, BrowserWindow, screen } from "electron";
+import { createRequire } from "module";
+import path from "path";
+import { fileURLToPath } from "url";
+const require = createRequire(import.meta.url);
+const { autoUpdater } = require("electron-updater");
 
-// const url = "http://localhost:3627";
-const url = "https://jesmyl.ru";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const url = app.isPackaged ? "https://jesmyl.ru" : "http://localhost:3627";
 
 const cookieEventName = "PRESENTATION_EVENT";
 const cookieEventStartSliceLen = 20;
 
 app.whenReady().then(async () => {
+  try {
+    autoUpdater.setFeedURL({
+      provider: "generic",
+      url: `${baseUrl}/down`,
+    });
+
+    autoUpdater.checkForUpdatesAndNotify();
+  } catch {}
+
   /** @type BrowserWindow */
   let presentationWin;
 
@@ -25,6 +41,7 @@ app.whenReady().then(async () => {
     height: 800,
     x: 100,
     y: 100,
+    icon: path.join(__dirname, "assets/img/ico-512x512.png"),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -34,13 +51,21 @@ app.whenReady().then(async () => {
     },
   });
 
+  win.webContents.on("did-finish-load", async () => {
+    const appVersion = app.getVersion();
+
+    win.webContents.executeJavaScript(`
+      localStorage.setItem('atom\\\\index:extVersion', '["${appVersion}"]');
+    `);
+  });
+
   const makeCookieEvent = (value) => {
     return {
       url,
       name: cookieEventName,
       value: `${`${Date.now()}`.padStart(
         cookieEventStartSliceLen,
-        "0"
+        "0",
       )}${JSON.stringify(value)}`,
     };
   };
@@ -127,7 +152,7 @@ app.whenReady().then(async () => {
     timeout = setTimeout(() => {
       if (cookie.name !== cookieEventName) return;
       const eventName = JSON.parse(
-        cookie.value.slice(cookieEventStartSliceLen)
+        cookie.value.slice(cookieEventStartSliceLen),
       );
       if (prevEventName === eventName) return;
       prevEventName = eventName;

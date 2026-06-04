@@ -1,6 +1,6 @@
 {
   "name": "jesmyl-electron",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "private": true,
   "type": "module",
   "keywords": [],
@@ -10,7 +10,10 @@
   "description": "",
   "scripts": {
     "start": "electron .",
-    "build": "docker run --rm -it -v ${PWD}:/project -w /project -e ELECTRON_CACHE=\"/root/.cache/electron\" electronuserland/builder:wine-mono sh -c \"npm ci --legacy-peer-deps && npx electron-builder --win --linux\""
+    "build": "docker run --rm -it -v ${PWD}:/project -w /project -e ELECTRON_CACHE=\"/root/.cache/electron\" electronuserland/builder:wine-mono sh -c \"npm ci --legacy-peer-deps && npx electron-builder --win --linux\"",
+    "deploy": "scp ./dist/*.exe ./dist/*.blockmap ./dist/*.AppImage root@185.244.173.52:/var/www/jesmyl.ru/down/",
+    "deploy:yml": "scp ./dist/latest*.yml root@185.244.173.52:/var/www/jesmyl.ru/down/",
+    "release": "npm --no-git-tag-version version patch && npm run build && npm run deploy:yml && npm run deploy"
   },
   "devDependencies": {
     "adm-zip": "^0.5.16",
@@ -23,26 +26,49 @@
     "productName": "JESMYL_PRO",
     "files": [
       "**/*",
+      "assets/**/*",
       "!node_modules/*/{test,__tests__,*.md}"
     ],
     "directories": {
       "output": "dist"
     },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://jesmyl.ru/down"
+      }
+    ],
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        "nsis"
       ],
-      "icon": "icon.ico"
+      "icon": "assets/img/ico-512x512.png",
+      "artifactName": "JESMYL_PRO.${ext}"
     },
     "linux": {
+      "publish": [
+        {
+          "provider": "generic",
+          "url": "https://jesmyl.ru/down"
+        }
+      ],
       "target": [
-        "AppImage"
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "category": "Utility",
       "asarUnpack": [
         "**/chrome-sandbox**"
-      ]
+      ],
+      "icon": "assets/img/ico-512x512.png",
+      "artifactName": "JESMYL_PRO.${ext}"
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.3"
   }
 }
