@@ -1,6 +1,6 @@
 {
   "name": "jesmyl-electron",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "type": "module",
   "keywords": [],
@@ -11,9 +11,7 @@
   "scripts": {
     "start": "electron .",
     "build": "docker run --rm -it -v ${PWD}:/project -w /project -e ELECTRON_CACHE=\"/root/.cache/electron\" electronuserland/builder:wine-mono sh -c \"npm ci --legacy-peer-deps && npx electron-builder --win --linux\"",
-    "deploy": "scp ./dist/*.exe ./dist/*.blockmap ./dist/*.AppImage root@185.244.173.52:/var/www/jesmyl.ru/down/",
-    "deploy:yml": "scp ./dist/latest*.yml root@185.244.173.52:/var/www/jesmyl.ru/down/",
-    "release": "npm --no-git-tag-version version patch && npm run build && npm run deploy:yml && npm run deploy"
+    "release": "npm --no-git-tag-version version patch && npm run build && node ./release.mjs"
   },
   "devDependencies": {
     "adm-zip": "^0.5.16",
